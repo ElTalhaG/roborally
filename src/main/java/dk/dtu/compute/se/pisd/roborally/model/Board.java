@@ -209,20 +209,39 @@ public class Board extends Subject {
         int y = space.y;
         switch (heading) {
             case SOUTH:
-                y = (y + 1) % height;
+                y = y + 1;
                 break;
             case WEST:
-                x = (x + width - 1) % width;
+                x = x - 1;
                 break;
             case NORTH:
-                y = (y + height - 1) % height;
+                y = y - 1;
                 break;
             case EAST:
-                x = (x + 1) % width;
+                x = x + 1;
                 break;
         }
 
-        return getSpace(x, y);
+        // Here we stop if there is a wall on the space we start from.
+        if (space.getWalls().contains(heading)) {
+            return null;
+        }
+
+        // Here we get the neighbour space in the chosen direction.
+        Space neighbour = getSpace(x, y);
+
+        // Here we stop if the neighbour is outside the board.
+        if (neighbour == null) {
+            return null;
+        }
+
+        // Here we also stop if the neighbour has a wall on the opposite side.
+        if (neighbour.getWalls().contains(getOppositeHeading(heading))) {
+            return null;
+        }
+
+        // Here we give back the reachable neighbour space.
+        return neighbour;
     }
 
     public String getStatusMessage() {
@@ -241,8 +260,30 @@ public class Board extends Subject {
             // Here we take the name from the current player and store it in the string.
             playerName = getCurrentPlayer().getName();
         }
-        // Here we build the status text from the player name and the move counter.
-        return "Player = " + playerName + ", Move count = " + getMoveCounter();
+        // Here we start with a simple register text.
+        String registerText = "-";
+        // Here we show the current register when the game is in activation.
+        if (getPhase() == Phase.ACTIVATION) {
+            registerText = String.valueOf(getStep() + 1);
+        }
+        // Here we build the status text from the phase, player, and register.
+        return "Phase = " + getPhase() + ", Player = " + playerName + ", Register = " + registerText;
+    }
+
+    private Heading getOppositeHeading(Heading heading) {
+        // Here we return the opposite direction of the heading we got.
+        switch (heading) {
+            case NORTH:
+                return Heading.SOUTH;
+            case SOUTH:
+                return Heading.NORTH;
+            case EAST:
+                return Heading.WEST;
+            case WEST:
+                return Heading.EAST;
+            default:
+                return heading;
+        }
     }
 
 }

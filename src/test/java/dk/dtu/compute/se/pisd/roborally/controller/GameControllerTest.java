@@ -49,7 +49,6 @@ class GameControllerTest {
         Assertions.assertEquals(player2, board.getCurrentPlayer(), "Current player should be " + player2.getName() +"!");
     }
 
-    /*
     @Test
     void moveForward() {
         Board board = gameController.board;
@@ -61,7 +60,43 @@ class GameControllerTest {
         Assertions.assertEquals(Heading.SOUTH, current.getHeading(), "Player 0 should be heading SOUTH!");
         Assertions.assertNull(board.getSpace(0, 0).getPlayer(), "Space (0,0) should be empty!");
     }
-    */
+
+    @Test
+    void turnRight() {
+        Board board = gameController.board;
+        Player current = board.getCurrentPlayer();
+
+        gameController.turnRight(current);
+
+        Assertions.assertEquals(Heading.WEST, current.getHeading(), "Player 0 should be heading WEST!");
+    }
+
+    @Test
+    void moveBack() {
+        Board board = gameController.board;
+        Player current = board.getCurrentPlayer();
+        current.setSpace(board.getSpace(6, 3));
+
+        gameController.moveBack(current);
+
+        Assertions.assertEquals(current, board.getSpace(6, 2).getPlayer(), "Player " + current.getName() + " should be on Space (6,2)!");
+        Assertions.assertNull(board.getSpace(6, 3).getPlayer(), "Space (6,3) should be empty!");
+    }
+
+    @Test
+    void getNeighbourStopsAtWall() {
+        Board board = gameController.board;
+        board.getSpace(0, 0).getWalls().add(Heading.SOUTH);
+
+        Assertions.assertNull(board.getNeighbour(board.getSpace(0, 0), Heading.SOUTH), "There should be no reachable neighbour through a wall!");
+    }
+
+    @Test
+    void getNeighbourStopsOutsideBoard() {
+        Board board = gameController.board;
+
+        Assertions.assertNull(board.getNeighbour(board.getSpace(0, 0), Heading.NORTH), "There should be no neighbour outside the board!");
+    }
 
     // TODO and there should be more tests added for the different assignments eventually
 

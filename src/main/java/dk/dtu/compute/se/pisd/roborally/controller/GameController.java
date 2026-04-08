@@ -219,6 +219,12 @@ public class GameController {
                     break;
                 // TODO A6c: add the cases for the new commands BACK and UTURN to
                 //     this case statement.
+                case BACK:
+                    this.moveBack(player);
+                    break;
+                case UTURN:
+                    this.turnAround(player);
+                    break;
                 default:
                     // DO NOTHING (for now)//
             }
@@ -227,25 +233,77 @@ public class GameController {
 
     // TODO A6c: implement this method
     public void moveForward(@NotNull Player player) {
+        // Here we stop if the player is not on this board.
+        if (player.board != board || player.getSpace() == null) {
+            return;
+        }
 
+        // Here we ask the board for the next space in the player's heading.
+        Space nextSpace = board.getNeighbour(player.getSpace(), player.getHeading());
+
+        // Here we only move if there is a reachable free space.
+        if (nextSpace != null && nextSpace.getPlayer() == null) {
+            player.setSpace(nextSpace);
+        }
     }
 
     // TODO A6c: implement this method
     public void fastForward(@NotNull Player player) {
-
+        // Here we move one step forward the first time.
+        moveForward(player);
+        // Here we try to move one more step forward after that.
+        moveForward(player);
     }
 
     // TODO A6c: implement this method
     public void turnRight(@NotNull Player player) {
+        // Here we stop if the player is not on this board.
+        if (player.board != board) {
+            return;
+        }
 
+        // Here we change the heading to the next direction on the right.
+        player.setHeading(player.getHeading().next());
     }
 
     // TODO A6c: implement this method
     public void turnLeft(@NotNull Player player) {
+        // Here we stop if the player is not on this board.
+        if (player.board != board) {
+            return;
+        }
 
+        // Here we change the heading to the next direction on the left.
+        player.setHeading(player.getHeading().prev());
     }
 
     // TODO A6c: Add two methods for the new commands BACK and UTURN here.
+    public void moveBack(@NotNull Player player) {
+        // Here we stop if the player is not on this board.
+        if (player.board != board || player.getSpace() == null) {
+            return;
+        }
+
+        // Here we find the direction behind the player.
+        Heading backHeading = player.getHeading().next().next();
+        // Here we ask for the space behind the player.
+        Space nextSpace = board.getNeighbour(player.getSpace(), backHeading);
+
+        // Here we only move back if that space can be reached and is empty.
+        if (nextSpace != null && nextSpace.getPlayer() == null) {
+            player.setSpace(nextSpace);
+        }
+    }
+
+    public void turnAround(@NotNull Player player) {
+        // Here we stop if the player is not on this board.
+        if (player.board != board) {
+            return;
+        }
+
+        // Here we turn the player two times so it faces the opposite way.
+        player.setHeading(player.getHeading().next().next());
+    }
 
     /**
      * A method called when no corresponding controller operation is implemented yet.

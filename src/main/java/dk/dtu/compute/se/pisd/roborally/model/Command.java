@@ -43,11 +43,13 @@ public enum Command {
     FORWARD("Fwd"),
     RIGHT("Turn Right"),
     LEFT("Turn Left"),
-    FAST_FORWARD("Fast Fwd");
+    FAST_FORWARD("Fast Fwd"),
 
     // TODO A6c: add new literals to this enumeration for the two commands
     //     BACK and UTURN, and implement the corresponding command in the
     //     vlass GameController)
+    BACK("Back"),
+    UTURN("U-Turn");
 
     // TODO A6e: add two new commands  here, which are interactive,
     //     which means that the player can chose between two options when
