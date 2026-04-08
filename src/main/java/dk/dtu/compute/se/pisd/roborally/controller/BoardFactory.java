@@ -1,8 +1,10 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
+import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
-import dk.dtu.compute.se.pisd.roborally.model.Heading;
-import dk.dtu.compute.se.pisd.roborally.model.Space;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A factory for creating boards. The factory itself is implemented as a singleton.
@@ -11,6 +13,8 @@ import dk.dtu.compute.se.pisd.roborally.model.Space;
  */
 // XXX A3: might be used for creating a first slightly more interesting board.
 public class BoardFactory {
+
+    private static final String DEFAULT_BOARD_NAME = "defaultboard";
 
     /**
      * The single instance of this class, which is lazily instantiated on demand.
@@ -48,44 +52,23 @@ public class BoardFactory {
         //     Dependent on the provided name, create a board accordingly and
         //     return it. In case the name is null, some default board should
         //     be returned (defensive programming).
+        // Here we start with the default board name in case the input is null.
+        String boardName = DEFAULT_BOARD_NAME;
 
-        Board board;
-        if (name == null) {
-            board = new Board(8,8, "<none>");
-        } else {
-            board = new Board(8,8, name);
+        // Here we use the given name if it is not null and it is one of the known boards.
+        if (name != null && getAvailableBoardNames().contains(name)) {
+            boardName = name;
         }
 
-        // add some walls, actions and checkpoints to some spaces
-        Space space = board.getSpace(0,0);
-        space.getWalls().add(Heading.SOUTH);
-        ConveyorBelt action  = new ConveyorBelt();
-        action.setHeading(Heading.WEST);
-        space.getActions().add(action);
+        // Here we try to load the board from the JSON file.
+        Board board = LoadBoard.loadBoard(boardName);
 
-        space = board.getSpace(1,0);
-        space.getWalls().add(Heading.NORTH);
-        action  = new ConveyorBelt();
-        action.setHeading(Heading.WEST);
-        space.getActions().add(action);
+        // Here we return a very simple fallback board if loading did not work.
+        if (board == null) {
+            board = new Board(8, 8, DEFAULT_BOARD_NAME);
+        }
 
-        space = board.getSpace(1,1);
-        space.getWalls().add(Heading.WEST);
-        action  = new ConveyorBelt();
-        action.setHeading(Heading.NORTH);
-        space.getActions().add(action);
-
-        space = board.getSpace(5,5);
-        space.getWalls().add(Heading.SOUTH);
-        action  = new ConveyorBelt();
-        action.setHeading(Heading.WEST);
-        space.getActions().add(action);
-
-        space = board.getSpace(6,5);
-        action  = new ConveyorBelt();
-        action.setHeading(Heading.WEST);
-        space.getActions().add(action);
-
+        // Here we give back the board we created or loaded.
         return board;
     }
 
@@ -95,5 +78,15 @@ public class BoardFactory {
     //     names in this list. Make sure that the new method that you create
     //     here has a proper JavaDoc documentation.
     //
+
+    /**
+     * Returns the names of the boards that can be selected in the application.
+     *
+     * @return the list of available board names
+     */
+    public List<String> getAvailableBoardNames() {
+        // Here we return the board names that exist in the project right now.
+        return Arrays.asList(DEFAULT_BOARD_NAME);
+    }
 
 }

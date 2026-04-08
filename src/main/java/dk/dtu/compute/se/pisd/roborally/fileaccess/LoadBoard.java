@@ -27,10 +27,12 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import dk.dtu.compute.se.pisd.roborally.controller.AppController;
 import dk.dtu.compute.se.pisd.roborally.controller.BoardFactory;
+import dk.dtu.compute.se.pisd.roborally.controller.CheckPoint;
 import dk.dtu.compute.se.pisd.roborally.controller.ConveyorBelt;
 import dk.dtu.compute.se.pisd.roborally.controller.FieldAction;
 import dk.dtu.compute.se.pisd.roborally.fileaccess.model.ActionTemplate;
 import dk.dtu.compute.se.pisd.roborally.fileaccess.model.BoardTemplate;
+import dk.dtu.compute.se.pisd.roborally.fileaccess.model.CheckPointTemplate;
 import dk.dtu.compute.se.pisd.roborally.fileaccess.model.ConveyorBeltTemplate;
 import dk.dtu.compute.se.pisd.roborally.fileaccess.model.SpaceTemplate;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
@@ -125,6 +127,16 @@ public class LoadBoard {
             ConveyorBelt conveyorBelt = new ConveyorBelt();
             conveyorBelt.setHeading(template.heading);
             return conveyorBelt;
+        } else if (actionTemplate instanceof CheckPointTemplate) {
+            // Here we turn the checkpoint template into a real checkpoint object.
+            CheckPointTemplate template = (CheckPointTemplate) actionTemplate;
+            CheckPoint checkPoint = new CheckPoint();
+            // Here we copy the checkpoint number from the template.
+            checkPoint.setNumber(template.number);
+            // Here we copy whether it is the last checkpoint.
+            checkPoint.setLast(template.last);
+            // Here we give back the checkpoint action we just made.
+            return checkPoint;
         } // else if ...
         // XXX if new field actions are added, the corresponding templates
         //     need to be added to the model subpackage of fileaccess and
@@ -224,6 +236,16 @@ public class LoadBoard {
             ConveyorBeltTemplate conveyorBeltTemplate = new ConveyorBeltTemplate();
             conveyorBeltTemplate.heading = conveyorBelt.getHeading();
             return conveyorBeltTemplate;
+        } else if (action instanceof CheckPoint) {
+            // Here we turn the checkpoint object into a template for JSON.
+            CheckPoint checkPoint = (CheckPoint) action;
+            CheckPointTemplate checkPointTemplate = new CheckPointTemplate();
+            // Here we copy the checkpoint number into the template.
+            checkPointTemplate.number = checkPoint.getNumber();
+            // Here we copy whether this is the last checkpoint.
+            checkPointTemplate.last = checkPoint.isLast();
+            // Here we give back the template we just filled.
+            return checkPointTemplate;
         } // else if ...
         // XXX if new field actions are added, the corresponding templates
         //     need to be added to the model subpackage of fileaccess and

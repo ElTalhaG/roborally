@@ -22,10 +22,17 @@
 package dk.dtu.compute.se.pisd.roborally.view;
 
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
+import dk.dtu.compute.se.pisd.roborally.controller.CheckPoint;
+import dk.dtu.compute.se.pisd.roborally.controller.ConveyorBelt;
+import dk.dtu.compute.se.pisd.roborally.controller.FieldAction;
+import dk.dtu.compute.se.pisd.roborally.model.Heading;
 import dk.dtu.compute.se.pisd.roborally.model.Player;
 import dk.dtu.compute.se.pisd.roborally.model.Space;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 import org.jetbrains.annotations.NotNull;
 
@@ -92,9 +99,93 @@ public class SpaceView extends StackPane implements ViewObserver {
 
             // TODO A6b: drawing the walls and the field action(s) on
             //     this space could be implemented here.
+            // Here we draw the walls that belong to this space.
+            drawWalls();
+            // Here we draw the actions that belong to this space.
+            drawActions();
 
             updatePlayer();
         }
+    }
+
+    private void drawWalls() {
+        // Here we go through all walls on this space one by one.
+        for (Heading wall : space.getWalls()) {
+            // Here we make one line that we can place on the edge of the space.
+            Line line = new Line();
+            line.setStroke(Color.DARKRED);
+            line.setStrokeWidth(3.0);
+
+            // Here we choose where the wall line should be drawn.
+            if (wall == Heading.NORTH) {
+                line.setStartX(0.0);
+                line.setStartY(0.0);
+                line.setEndX(SPACE_WIDTH);
+                line.setEndY(0.0);
+            } else if (wall == Heading.SOUTH) {
+                line.setStartX(0.0);
+                line.setStartY(SPACE_HEIGHT);
+                line.setEndX(SPACE_WIDTH);
+                line.setEndY(SPACE_HEIGHT);
+            } else if (wall == Heading.WEST) {
+                line.setStartX(0.0);
+                line.setStartY(0.0);
+                line.setEndX(0.0);
+                line.setEndY(SPACE_HEIGHT);
+            } else if (wall == Heading.EAST) {
+                line.setStartX(SPACE_WIDTH);
+                line.setStartY(0.0);
+                line.setEndX(SPACE_WIDTH);
+                line.setEndY(SPACE_HEIGHT);
+            }
+
+            // Here we add the line to the space view.
+            this.getChildren().add(line);
+        }
+    }
+
+    private void drawActions() {
+        // Here we go through all field actions on this space one by one.
+        for (FieldAction action : space.getActions()) {
+            // Here we draw a small arrow when the action is a conveyor belt.
+            if (action instanceof ConveyorBelt) {
+                drawConveyorBelt((ConveyorBelt) action);
+            } else if (action instanceof CheckPoint) {
+                // Here we draw a checkpoint marker when the action is a checkpoint.
+                drawCheckPoint((CheckPoint) action);
+            }
+        }
+    }
+
+    private void drawConveyorBelt(ConveyorBelt conveyorBelt) {
+        // Here we make a small triangle that shows the belt direction.
+        Polygon arrow = new Polygon(0.0, -10.0,
+                8.0, 6.0,
+                -8.0, 6.0);
+        arrow.setFill(Color.LIGHTGREEN);
+
+        // Here we rotate the arrow so it points in the conveyor direction.
+        if (conveyorBelt.getHeading() != null) {
+            arrow.setRotate((90 * conveyorBelt.getHeading().ordinal()) % 360);
+        }
+
+        // Here we add the conveyor arrow to the space view.
+        this.getChildren().add(arrow);
+    }
+
+    private void drawCheckPoint(CheckPoint checkPoint) {
+        // Here we make a small circle to show the checkpoint position.
+        Circle circle = new Circle(10.0);
+        circle.setFill(Color.GOLD);
+        circle.setStroke(Color.DARKGOLDENROD);
+
+        // Here we make a label that shows the checkpoint number.
+        Label label = new Label(String.valueOf(checkPoint.getNumber()));
+        label.setStyle("-fx-font-size: 9px; -fx-font-weight: bold;");
+
+        // Here we add both the circle and the number to the space view.
+        this.getChildren().add(circle);
+        this.getChildren().add(label);
     }
 
 }
