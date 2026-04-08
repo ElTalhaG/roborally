@@ -62,6 +62,7 @@ public class Board extends Subject {
     // TODO A6a: add a moveCounter attribute to this class;
     //     and add the corresponding getter and setter methods for
     //     this move counter at an appropriate place in this class.
+    private int moveCounter = 0;
 
     public Board(int width, int height, @NotNull String boardName) {
         this.boardName = boardName;
@@ -167,6 +168,21 @@ public class Board extends Subject {
         }
     }
 
+    public int getMoveCounter() {
+        // Here we just give back the move counter value.
+        return moveCounter;
+    }
+
+    public void setMoveCounter(int moveCounter) {
+        // Here we only update the value if it is different from before.
+        if (moveCounter != this.moveCounter) {
+            // Here we save the new move counter in the board.
+            this.moveCounter = moveCounter;
+            // Here we tell the views that something changed.
+            notifyChange();
+        }
+    }
+
     public int getPlayerNumber(@NotNull Player player) {
         if (player.board == this) {
             return players.indexOf(player);
@@ -218,7 +234,15 @@ public class Board extends Subject {
         // TODO A6c: changed the status so that it shows the phase, the current player, and the current register
         //     and you can remove the move count status message message and the corresponding counter again
         // TODO A6e: add something to the status message, when a player has won the game
-        return "Player = " + getCurrentPlayer().getName();
+        // Here we start with a default text in case no player is selected.
+        String playerName = "<none>";
+        // Here we check if there is a current player.
+        if (getCurrentPlayer() != null) {
+            // Here we take the name from the current player and store it in the string.
+            playerName = getCurrentPlayer().getName();
+        }
+        // Here we build the status text from the player name and the move counter.
+        return "Player = " + playerName + ", Move count = " + getMoveCounter();
     }
 
 }

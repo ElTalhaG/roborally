@@ -53,7 +53,29 @@ public class GameController {
         //   - the counter of moves in the game should be increased by one
         //     if and when the player is moved (the counter and the status line
         //     message needs to be implemented at another place)
+        // Here we get the player whose turn it is right now.
+        Player currentPlayer = board.getCurrentPlayer();
 
+        // Here we only continue if there is a player, the space is on this board, and the space is empty.
+        if (currentPlayer != null && space.board == board && space.getPlayer() == null) {
+            // Here we move the player to the space the user clicked on.
+            currentPlayer.setSpace(space);
+            // Here we take the old move count and add one more move to it.
+            board.setMoveCounter(board.getMoveCounter() + 1);
+
+            // Here we find the number of the player we just moved.
+            int currentPlayerNumber = board.getPlayerNumber(currentPlayer);
+            // Here we start by saying the next player is one step after that player.
+            int nextPlayerNumber = currentPlayerNumber + 1;
+
+            // Here we go back to player 0 if we were at the end of the list.
+            if (nextPlayerNumber >= board.getPlayersNumber()) {
+                nextPlayerNumber = 0;
+            }
+
+            // Here we change the turn to the next player.
+            board.setCurrentPlayer(board.getPlayer(nextPlayerNumber));
+        }
     }
 
     // XXX A6c
