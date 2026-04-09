@@ -1,7 +1,10 @@
 package dk.dtu.compute.se.pisd.roborally.controller;
 
 import dk.dtu.compute.se.pisd.roborally.model.Board;
+import dk.dtu.compute.se.pisd.roborally.model.Command;
+import dk.dtu.compute.se.pisd.roborally.model.CommandCard;
 import dk.dtu.compute.se.pisd.roborally.model.Heading;
+import dk.dtu.compute.se.pisd.roborally.model.Phase;
 import dk.dtu.compute.se.pisd.roborally.model.Player;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -96,6 +99,56 @@ class GameControllerTest {
         Board board = gameController.board;
 
         Assertions.assertNull(board.getNeighbour(board.getSpace(0, 0), Heading.NORTH), "There should be no neighbour outside the board!");
+    }
+
+    @Test
+    void conveyorBeltMovesPlayer() {
+        Board board = gameController.board;
+        Player current = board.getCurrentPlayer();
+        current.setSpace(board.getSpace(2, 2));
+
+        ConveyorBelt conveyorBelt = new ConveyorBelt();
+        conveyorBelt.setHeading(Heading.SOUTH);
+        board.getSpace(2, 2).getActions().add(conveyorBelt);
+
+        Assertions.assertTrue(conveyorBelt.doAction(gameController, board.getSpace(2, 2)), "The conveyor belt should move the player!");
+        Assertions.assertEquals(current, board.getSpace(2, 3).getPlayer(), "Player should be moved to Space (2,3)!");
+    }
+
+    @Test
+    void checkpointUpdatesProgressInOrder() {
+        Board board = gameController.board;
+        Player current = board.getCurrentPlayer();
+
+        CheckPoint checkPoint = new CheckPoint();
+        checkPoint.setNumber(1);
+        board.getSpace(0, 0).getActions().add(checkPoint);
+
+        Assertions.assertTrue(checkPoint.doAction(gameController, board.getSpace(0, 0)), "The checkpoint should be counted!");
+        Assertions.assertEquals(1, current.getCheckPoints(), "The player should have reached checkpoint 1!");
+    }
+
+    @Test
+    void executeStepRunsFieldActions() {
+        Board board = gameController.board;
+        Player current = board.getCurrentPlayer();
+        current.setSpace(board.getSpace(2, 2));
+        current.setHeading(Heading.SOUTH);
+
+        board.getSpace(2, 3).getActions().clear();
+        CheckPoint checkPoint = new CheckPoint();
+        checkPoint.setNumber(1);
+        board.getSpace(2, 3).getActions().add(checkPoint);
+
+        current.getProgramField(0).setCard(new CommandCard(Command.FORWARD));
+        board.setPhase(Phase.ACTIVATION);
+        board.setStep(0);
+        board.setCurrentPlayer(current);
+
+        gameController.executeStep();
+
+        Assertions.assertEquals(current, board.getSpace(2, 3).getPlayer(), "The player should end on Space (2,3)!");
+        Assertions.assertEquals(1, current.getCheckPoints(), "The checkpoint action should have been executed!");
     }
 
     // TODO and there should be more tests added for the different assignments eventually

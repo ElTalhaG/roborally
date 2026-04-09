@@ -50,6 +50,7 @@ public class PlayerView extends Tab implements ViewObserver {
     private GridPane programPane;
     private Label cardsLabel;
     private GridPane cardsPane;
+    private Label statusLabel;
 
     private CardFieldView[] programCardViews;
     private CardFieldView[] cardViews;
@@ -132,18 +133,23 @@ public class PlayerView extends Tab implements ViewObserver {
 
         // TODO A6d: a label for the status of this player could be added here
         //     for showing the number of achieved checkpoints (etc).
+        statusLabel = new Label("Checkpoints: 0");
+        top.getChildren().add(statusLabel);
 
         if (player.board != null) {
             player.board.attach(this);
+            player.attach(this);
             update(player.board);
         }
     }
 
     @Override
     public void updateView(Subject subject) {
-        if (subject == player.board) {
+        if (subject == player.board || subject == player) {
             // TODO A6d: update the status label for this player (showing the number
             //     of achieved checkpoints)
+            // Here we update the label so it shows the checkpoint progress of the player.
+            statusLabel.setText("Checkpoints: " + player.getCheckPoints());
             for (int i = 0; i < Player.NO_REGISTERS; i++) {
                 CardFieldView cardFieldView = programCardViews[i];
                 if (cardFieldView != null) {

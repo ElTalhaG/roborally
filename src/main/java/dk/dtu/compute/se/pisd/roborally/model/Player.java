@@ -45,6 +45,8 @@ public class Player extends Subject {
     private Space space;
     private Heading heading = SOUTH;
 
+    private int checkPoints = 0;
+
     private CommandCardField[] program;
     private CommandCardField[] cards;
 
@@ -119,6 +121,25 @@ public class Player extends Subject {
         if (heading != this.heading) {
             this.heading = heading;
             notifyChange();
+            if (space != null) {
+                space.playerChanged();
+            }
+        }
+    }
+
+    public int getCheckPoints() {
+        // Here we just give back how many checkpoints the player has reached.
+        return checkPoints;
+    }
+
+    public void setCheckPoints(int checkPoints) {
+        // Here we only save the value if it changed.
+        if (checkPoints != this.checkPoints) {
+            // Here we store the new checkpoint number on the player.
+            this.checkPoints = checkPoints;
+            // Here we tell the views that the player changed.
+            notifyChange();
+            // Here we also update the space view if the player is standing on a space.
             if (space != null) {
                 space.playerChanged();
             }

@@ -53,9 +53,34 @@ public class ConveyorBelt extends FieldAction {
     @Override
     public boolean doAction(@NotNull GameController gameController, @NotNull Space space) {
         // TODO A6d: needs to be implemented
-        // ...
+        // Here we stop if there is no player on this space.
+        if (space.getPlayer() == null) {
+            return false;
+        }
 
-        return false;
+        // Here we stop if the conveyor belt has no heading yet.
+        if (heading == null) {
+            return false;
+        }
+
+        // Here we ask the board for the next space in the conveyor direction.
+        Space nextSpace = space.board.getNeighbour(space, heading);
+
+        // Here we stop if the next space cannot be reached.
+        if (nextSpace == null) {
+            return false;
+        }
+
+        // Here we stop if another player is already standing on the next space.
+        if (nextSpace.getPlayer() != null) {
+            return false;
+        }
+
+        // Here we move the player one step in the conveyor direction.
+        space.getPlayer().setSpace(nextSpace);
+
+        // Here we say that the action was carried out.
+        return true;
     }
 
 }

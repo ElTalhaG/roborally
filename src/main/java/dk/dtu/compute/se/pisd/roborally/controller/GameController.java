@@ -174,6 +174,10 @@ public class GameController {
                     Command command = card.command;
                     executeCommand(currentPlayer, command);
                 }
+                // Here we run the field actions on the space where the player ends up.
+                if (currentPlayer.getSpace() != null) {
+                    executeFieldActions(currentPlayer.getSpace());
+                }
                 int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
                 if (nextPlayerNumber < board.getPlayersNumber()) {
                     board.setCurrentPlayer(board.getPlayer(nextPlayerNumber));
@@ -303,6 +307,14 @@ public class GameController {
 
         // Here we turn the player two times so it faces the opposite way.
         player.setHeading(player.getHeading().next().next());
+    }
+
+    private void executeFieldActions(@NotNull Space space) {
+        // Here we go through all actions on the space one by one.
+        for (FieldAction action : space.getActions()) {
+            // Here we run each action with this game controller and the current space.
+            action.doAction(this, space);
+        }
     }
 
     /**
