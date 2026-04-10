@@ -151,6 +151,57 @@ class GameControllerTest {
         Assertions.assertEquals(1, current.getCheckPoints(), "The checkpoint action should have been executed!");
     }
 
+    @Test
+    void interactiveCommandChangesPhase() {
+        Board board = gameController.board;
+        Player current = board.getCurrentPlayer();
+
+        current.getProgramField(0).setCard(new CommandCard(Command.MOVE_1_OR_2));
+        board.setPhase(Phase.ACTIVATION);
+        board.setStep(0);
+        board.setCurrentPlayer(current);
+
+        gameController.executeStep();
+
+        Assertions.assertEquals(Phase.PLAYER_INTERACTION, board.getPhase(), "The game should wait for the player to choose an option!");
+        Assertions.assertEquals(Command.MOVE_1_OR_2, gameController.getPendingInteractiveCommand(), "The interactive command should be stored!");
+    }
+
+    @Test
+    void interactiveCommandOptionExecutesChoice() {
+        Board board = gameController.board;
+        Player current = board.getCurrentPlayer();
+        current.setSpace(board.getSpace(2, 2));
+        current.setHeading(Heading.SOUTH);
+
+        current.getProgramField(0).setCard(new CommandCard(Command.MOVE_1_OR_2));
+        board.setPhase(Phase.ACTIVATION);
+        board.setStep(0);
+        board.setCurrentPlayer(current);
+        board.setStepMode(true);
+
+        gameController.executeStep();
+        gameController.executeInteractiveCommandOption(Command.FAST_FORWARD);
+
+        Assertions.assertEquals(Phase.ACTIVATION, board.getPhase(), "The game should go back to activation after the player chooses!");
+        Assertions.assertEquals(current, board.getSpace(2, 4).getPlayer(), "The player should move two spaces forward!");
+    }
+
+    @Test
+    void lastCheckpointSetsWinner() {
+        Board board = gameController.board;
+        Player current = board.getCurrentPlayer();
+
+        CheckPoint checkPoint = new CheckPoint();
+        checkPoint.setNumber(1);
+        checkPoint.setLast(true);
+        board.getSpace(0, 0).getActions().add(checkPoint);
+
+        Assertions.assertTrue(checkPoint.doAction(gameController, board.getSpace(0, 0)), "The last checkpoint should be counted!");
+        Assertions.assertEquals(current, board.getWinner(), "The player should be stored as the winner!");
+        Assertions.assertTrue(board.getStatusMessage().contains(current.getName()), "The status message should mention the winner name!");
+    }
+
     // TODO and there should be more tests added for the different assignments eventually
 
 }

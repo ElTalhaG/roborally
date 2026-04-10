@@ -53,6 +53,8 @@ public class Board extends Subject {
 
     private Player current;
 
+    private Player winner;
+
     private Phase phase = INITIALISATION;
 
     private int step = 0;
@@ -131,6 +133,21 @@ public class Board extends Subject {
     public void setCurrentPlayer(Player player) {
         if (player != this.current && players.contains(player)) {
             this.current = player;
+            notifyChange();
+        }
+    }
+
+    public Player getWinner() {
+        // Here we give back the player who won the game.
+        return winner;
+    }
+
+    public void setWinner(Player winner) {
+        // Here we only save the winner if it changed.
+        if (winner != this.winner) {
+            // Here we store the winner on the board.
+            this.winner = winner;
+            // Here we tell the views that the board changed.
             notifyChange();
         }
     }
@@ -266,8 +283,14 @@ public class Board extends Subject {
         if (getPhase() == Phase.ACTIVATION) {
             registerText = String.valueOf(getStep() + 1);
         }
-        // Here we build the status text from the phase, player, and register.
-        return "Phase = " + getPhase() + ", Player = " + playerName + ", Register = " + registerText;
+        // Here we start with the normal status text.
+        String status = "Phase = " + getPhase() + ", Player = " + playerName + ", Register = " + registerText;
+        // Here we add winner information when someone has won the game.
+        if (getWinner() != null) {
+            status = status + ", Winner = " + getWinner().getName();
+        }
+        // Here we give back the full status text.
+        return status;
     }
 
     private Heading getOppositeHeading(Heading heading) {

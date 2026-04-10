@@ -34,6 +34,8 @@ public class GameController {
 
     final public Board board;
 
+    private Command pendingInteractiveCommand;
+
     public GameController(@NotNull Board board) {
         this.board = board;
     }
@@ -80,6 +82,7 @@ public class GameController {
 
     // XXX A6c
     public void startProgrammingPhase() {
+        pendingInteractiveCommand = null;
         board.setPhase(Phase.PROGRAMMING);
         board.setCurrentPlayer(board.getPlayer(0));
         board.setStep(0);
@@ -110,6 +113,7 @@ public class GameController {
 
     // XXX A6c
     public void finishProgrammingPhase() {
+        pendingInteractiveCommand = null;
         makeProgramFieldsInvisible();
         makeProgramFieldsVisible(0);
         board.setPhase(Phase.ACTIVATION);
@@ -141,12 +145,18 @@ public class GameController {
 
     // XXX A6c
     public void executePrograms() {
+        if (board.getWinner() != null) {
+            return;
+        }
         board.setStepMode(false);
         continuePrograms();
     }
 
     // XXX A6c
     public void executeStep() {
+        if (board.getWinner() != null) {
+            return;
+        }
         board.setStepMode(true);
         continuePrograms();
     }
@@ -155,7 +165,7 @@ public class GameController {
     private void continuePrograms() {
         do {
             executeNextStep();
-        } while (board.getPhase() == Phase.ACTIVATION && !board.isStepMode());
+        } while (board.getPhase() == Phase.ACTIVATION && !board.isStepMode() && board.getWinner() == null);
     }
 
     // XXX A6c
@@ -166,31 +176,21 @@ public class GameController {
     //     at the right point)
     private void executeNextStep() {
         Player currentPlayer = board.getCurrentPlayer();
-        if (board.getPhase() == Phase.ACTIVATION && currentPlayer != null) {
+        if (board.getPhase() == Phase.ACTIVATION && currentPlayer != null && board.getWinner() == null) {
             int step = board.getStep();
             if (step >= 0 && step < Player.NO_REGISTERS) {
                 CommandCard card = currentPlayer.getProgramField(step).getCard();
                 if (card != null) {
                     Command command = card.command;
+                    // Here we stop and ask the player when the card is interactive.
+                    if (command.isInteractive()) {
+                        pendingInteractiveCommand = command;
+                        board.setPhase(Phase.PLAYER_INTERACTION);
+                        return;
+                    }
                     executeCommand(currentPlayer, command);
                 }
-                // Here we run the field actions on the space where the player ends up.
-                if (currentPlayer.getSpace() != null) {
-                    executeFieldActions(currentPlayer.getSpace());
-                }
-                int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
-                if (nextPlayerNumber < board.getPlayersNumber()) {
-                    board.setCurrentPlayer(board.getPlayer(nextPlayerNumber));
-                } else {
-                    step++;
-                    if (step < Player.NO_REGISTERS) {
-                        makeProgramFieldsVisible(step);
-                        board.setStep(step);
-                        board.setCurrentPlayer(board.getPlayer(0));
-                    } else {
-                        startProgrammingPhase();
-                    }
-                }
+                finishCurrentPlayerStep(currentPlayer);
             } else {
                 // this should not happen
                 assert false;
@@ -228,6 +228,10 @@ public class GameController {
                     break;
                 case UTURN:
                     this.turnAround(player);
+                    break;
+                case MOVE_1_OR_2:
+                case TURN_LEFT_OR_RIGHT:
+                    // DO NOTHING here because these commands are handled via player interaction.
                     break;
                 default:
                     // DO NOTHING (for now)//
@@ -314,6 +318,77 @@ public class GameController {
         for (FieldAction action : space.getActions()) {
             // Here we run each action with this game controller and the current space.
             action.doAction(this, space);
+        }
+    }
+
+    public Command getPendingInteractiveCommand() {
+        // Here we give back the interactive command that is waiting for a choice.
+        return pendingInteractiveCommand;
+    }
+
+    public void executeInteractiveCommandOption(@NotNull Command command) {
+        // Here we stop if the game is not waiting for an interactive choice.
+        if (board.getPhase() != Phase.PLAYER_INTERACTION) {
+            return;
+        }
+
+        // Here we stop if there is no current player.
+        Player currentPlayer = board.getCurrentPlayer();
+        if (currentPlayer == null) {
+            return;
+        }
+
+        // Here we stop if there is no pending interactive command.
+        if (pendingInteractiveCommand == null) {
+            return;
+        }
+
+        // Here we stop if the chosen command is not one of the allowed options.
+        if (!pendingInteractiveCommand.getOptions().contains(command)) {
+            return;
+        }
+
+        // Here we switch back to activation because the player made a choice.
+        board.setPhase(Phase.ACTIVATION);
+        // Here we run the command option the player selected.
+        executeCommand(currentPlayer, command);
+        // Here we clear the pending interactive command because it is done now.
+        pendingInteractiveCommand = null;
+        // Here we finish the rest of this player's step.
+        finishCurrentPlayerStep(currentPlayer);
+        // Here we continue automatically when we are not in step mode.
+        if (!board.isStepMode()) {
+            continuePrograms();
+        }
+    }
+
+    private void finishCurrentPlayerStep(@NotNull Player currentPlayer) {
+        // Here we run the field actions on the space where the player ends up.
+        if (currentPlayer.getSpace() != null) {
+            executeFieldActions(currentPlayer.getSpace());
+        }
+
+        // Here we stop early if the player already won the game.
+        if (board.getWinner() != null) {
+            return;
+        }
+
+        // Here we find the next player number.
+        int nextPlayerNumber = board.getPlayerNumber(currentPlayer) + 1;
+        if (nextPlayerNumber < board.getPlayersNumber()) {
+            // Here we switch to the next player in the same register.
+            board.setCurrentPlayer(board.getPlayer(nextPlayerNumber));
+        } else {
+            int step = board.getStep() + 1;
+            if (step < Player.NO_REGISTERS) {
+                // Here we move on to the next register and show it.
+                makeProgramFieldsVisible(step);
+                board.setStep(step);
+                board.setCurrentPlayer(board.getPlayer(0));
+            } else {
+                // Here we start a new programming phase after all registers are done.
+                startProgrammingPhase();
+            }
         }
     }
 

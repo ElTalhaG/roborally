@@ -49,11 +49,13 @@ public enum Command {
     //     BACK and UTURN, and implement the corresponding command in the
     //     vlass GameController)
     BACK("Back"),
-    UTURN("U-Turn");
+    UTURN("U-Turn"),
 
     // TODO A6e: add two new commands  here, which are interactive,
     //     which means that the player can chose between two options when
     //     the command is executed.
+    MOVE_1_OR_2("Move 1 or 2", FORWARD, FAST_FORWARD),
+    TURN_LEFT_OR_RIGHT("Turn Left or Right", LEFT, RIGHT);
 
     /**
      * The name shown for this command on the GUI.

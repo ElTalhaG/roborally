@@ -23,6 +23,7 @@ package dk.dtu.compute.se.pisd.roborally.view;
 
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 import dk.dtu.compute.se.pisd.roborally.controller.GameController;
+import dk.dtu.compute.se.pisd.roborally.model.Command;
 import dk.dtu.compute.se.pisd.roborally.model.CommandCardField;
 import dk.dtu.compute.se.pisd.roborally.model.Phase;
 import dk.dtu.compute.se.pisd.roborally.model.Player;
@@ -150,6 +151,12 @@ public class PlayerView extends Tab implements ViewObserver {
             //     of achieved checkpoints)
             // Here we update the label so it shows the checkpoint progress of the player.
             statusLabel.setText("Checkpoints: " + player.getCheckPoints());
+            // Here we stop the execute buttons when the game already has a winner.
+            if (player.board.getWinner() != null) {
+                finishButton.setDisable(true);
+                executeButton.setDisable(true);
+                stepButton.setDisable(true);
+            }
             for (int i = 0; i < Player.NO_REGISTERS; i++) {
                 CardFieldView cardFieldView = programCardViews[i];
                 if (cardFieldView != null) {
@@ -173,7 +180,7 @@ public class PlayerView extends Tab implements ViewObserver {
                 }
             }
 
-            if (player.board.getPhase() != Phase.PLAYER_INTERACTION) {
+            if (player.board.getWinner() == null && player.board.getPhase() != Phase.PLAYER_INTERACTION) {
                 if (!programPane.getChildren().contains(buttonPanel)) {
                     programPane.getChildren().remove(playerInteractionPanel);
                     programPane.add(buttonPanel, Player.NO_REGISTERS, 0);
@@ -204,7 +211,7 @@ public class PlayerView extends Tab implements ViewObserver {
                         executeButton.setDisable(true);
                         stepButton.setDisable(true);
                 }
-            } else {
+            } else if (player.board.getWinner() == null) {
                 if (!programPane.getChildren().contains(playerInteractionPanel)) {
                     programPane.getChildren().remove(buttonPanel);
                     programPane.add(playerInteractionPanel, Player.NO_REGISTERS, 0);
@@ -216,15 +223,21 @@ public class PlayerView extends Tab implements ViewObserver {
                     //      an interactive command card, and the buttons should represent
                     //      the player's choices of the interactive command card. The
                     //      following is just a mockup showing two options
-                    Button optionButton = new Button("Option1");
-                    optionButton.setOnAction( e -> gameController.notImplemented());
-                    optionButton.setDisable(false);
-                    playerInteractionPanel.getChildren().add(optionButton);
-
-                    optionButton = new Button("Option 2");
-                    optionButton.setOnAction( e -> gameController.notImplemented());
-                    optionButton.setDisable(false);
-                    playerInteractionPanel.getChildren().add(optionButton);
+                    // Here we get the interactive command that is waiting for a choice.
+                    Command interactiveCommand = gameController.getPendingInteractiveCommand();
+                    // Here we only show option buttons if there really is an interactive command.
+                    if (interactiveCommand != null) {
+                        // Here we go through each possible option of the command.
+                        for (Command option : interactiveCommand.getOptions()) {
+                            // Here we make one button for this option.
+                            Button optionButton = new Button(option.displayName);
+                            // Here we connect the button to the chosen command option.
+                            optionButton.setOnAction(e -> gameController.executeInteractiveCommandOption(option));
+                            optionButton.setDisable(false);
+                            // Here we add the option button to the panel.
+                            playerInteractionPanel.getChildren().add(optionButton);
+                        }
+                    }
                 }
             }
         }
