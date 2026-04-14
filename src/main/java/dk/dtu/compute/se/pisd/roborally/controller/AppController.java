@@ -44,10 +44,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * ...
+ * Controls the top-level application actions such as starting and stopping games.
  *
  * @author Ekkart Kindler, ekki@dtu.dk
- *
  */
 public class AppController implements Observer {
 
@@ -59,10 +58,18 @@ public class AppController implements Observer {
 
     private GameController gameController;
 
+    /**
+     * Creates the application controller.
+     *
+     * @param roboRally the application instance
+     */
     public AppController(@NotNull RoboRally roboRally) {
         this.roboRally = roboRally;
     }
 
+    /**
+     * Starts a new game after the user chooses player count and board.
+     */
     public void newGame() {
         ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
         dialog.setTitle("Player number");
@@ -113,12 +120,11 @@ public class AppController implements Observer {
     }
 
     public void saveGame() {
-        // TODO DB4a: needs to be implemented
+        // Database save is not part of assignments 6a-6e, so this stays empty here.
     }
 
     public void loadGame() {
-        // TODO DB4a: needs to be implemented
-        // for now, we just create a new game
+        // Database load is not part of assignments 6a-6e, so we start a new game instead.
         if (gameController == null) {
             newGame();
         }
@@ -169,6 +175,11 @@ public class AppController implements Observer {
         }
     }
 
+    /**
+     * Returns whether a game is currently running.
+     *
+     * @return true if a game is running
+     */
     public boolean isGameRunning() {
         return gameController != null;
     }

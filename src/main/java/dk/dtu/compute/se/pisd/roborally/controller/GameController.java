@@ -25,10 +25,10 @@ import dk.dtu.compute.se.pisd.roborally.model.*;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * ...
+ * Controls the game flow of RoboRally, including movement, phases,
+ * command execution, field actions, and interactive cards.
  *
  * @author Ekkart Kindler, ekki@dtu.dk
- *
  */
 public class GameController {
 
@@ -36,6 +36,11 @@ public class GameController {
 
     private Command pendingInteractiveCommand;
 
+    /**
+     * Creates a controller for the given board.
+     *
+     * @param board the board that this controller manages
+     */
     public GameController(@NotNull Board board) {
         this.board = board;
     }
@@ -80,7 +85,9 @@ public class GameController {
         }
     }
 
-    // XXX A6c
+    /**
+     * Starts the programming phase and gives all players a new hand of cards.
+     */
     public void startProgrammingPhase() {
         pendingInteractiveCommand = null;
         board.setPhase(Phase.PROGRAMMING);
@@ -104,14 +111,20 @@ public class GameController {
         }
     }
 
-    // XXX A6c
+    /**
+     * Creates one random command card.
+     *
+     * @return the generated command card
+     */
     private CommandCard generateRandomCommandCard() {
         Command[] commands = Command.values();
         int random = (int) (Math.random() * commands.length);
         return new CommandCard(commands[random]);
     }
 
-    // XXX A6c
+    /**
+     * Ends the programming phase and starts the activation phase.
+     */
     public void finishProgrammingPhase() {
         pendingInteractiveCommand = null;
         makeProgramFieldsInvisible();
@@ -121,7 +134,11 @@ public class GameController {
         board.setStep(0);
     }
 
-    // XXX A6c
+    /**
+     * Makes one register visible for all players.
+     *
+     * @param register the register index that should be shown
+     */
     private void makeProgramFieldsVisible(int register) {
         if (register >= 0 && register < Player.NO_REGISTERS) {
             for (int i = 0; i < board.getPlayersNumber(); i++) {
@@ -132,7 +149,9 @@ public class GameController {
         }
     }
 
-    // XXX A6c
+    /**
+     * Hides all program fields for all players.
+     */
     private void makeProgramFieldsInvisible() {
         for (int i = 0; i < board.getPlayersNumber(); i++) {
             Player player = board.getPlayer(i);
@@ -143,7 +162,9 @@ public class GameController {
         }
     }
 
-    // XXX A6c
+    /**
+     * Executes all remaining program steps until the phase changes or the game ends.
+     */
     public void executePrograms() {
         if (board.getWinner() != null) {
             return;
@@ -152,7 +173,9 @@ public class GameController {
         continuePrograms();
     }
 
-    // XXX A6c
+    /**
+     * Executes exactly one step of the current program.
+     */
     public void executeStep() {
         if (board.getWinner() != null) {
             return;
@@ -161,20 +184,24 @@ public class GameController {
         continuePrograms();
     }
 
-    // XXX A6c
+    /**
+     * Continues program execution while automatic execution is enabled.
+     */
     private void continuePrograms() {
         do {
             executeNextStep();
         } while (board.getPhase() == Phase.ACTIVATION && !board.isStepMode() && board.getWinner() == null);
     }
 
-    // XXX A6c
-    // TODO A6d: add the execution of the field actions at the right
-    //      place in this method
-    // TODO A6e: implement the execution af an interactive card to
-    //     this method (e.g. by switching to the PLAYER_INTERACTION phase
-    //     at the right point)
+    /**
+     * Executes the next step for the current player in the activation phase.
+     */
     private void executeNextStep() {
+        // TODO A6d: add the execution of the field actions at the right
+        //      place in this method
+        // TODO A6e: implement the execution af an interactive card to
+        //     this method (e.g. by switching to the PLAYER_INTERACTION phase
+        //     at the right point)
         Player currentPlayer = board.getCurrentPlayer();
         if (board.getPhase() == Phase.ACTIVATION && currentPlayer != null && board.getWinner() == null) {
             int step = board.getStep();
@@ -192,16 +219,19 @@ public class GameController {
                 }
                 finishCurrentPlayerStep(currentPlayer);
             } else {
-                // this should not happen
-                assert false;
+                return;
             }
         } else {
-            // this should not happen
-            assert false;
+            return;
         }
     }
 
-    // XXX A6c
+    /**
+     * Executes one command for one player.
+     *
+     * @param player the player that should execute the command
+     * @param command the command to execute
+     */
     private void executeCommand(@NotNull Player player, Command command) {
         if (player != null && player.board == board && command != null) {
             // XXX This is a very simplistic way of dealing with some basic cards and
@@ -239,32 +269,42 @@ public class GameController {
         }
     }
 
-    // TODO A6c: implement this method
+    /**
+     * Moves a player one space forward, pushing other players if possible.
+     *
+     * @param player the player to move
+     */
     public void moveForward(@NotNull Player player) {
+        // TODO A6c: implement this method
         // Here we stop if the player is not on this board.
         if (player.board != board || player.getSpace() == null) {
             return;
         }
 
-        // Here we ask the board for the next space in the player's heading.
-        Space nextSpace = board.getNeighbour(player.getSpace(), player.getHeading());
-
-        // Here we only move if there is a reachable free space.
-        if (nextSpace != null && nextSpace.getPlayer() == null) {
-            player.setSpace(nextSpace);
-        }
+        // Here we try to move in the direction the player is facing.
+        movePlayer(player, player.getHeading());
     }
 
-    // TODO A6c: implement this method
+    /**
+     * Moves a player two spaces forward.
+     *
+     * @param player the player to move
+     */
     public void fastForward(@NotNull Player player) {
+        // TODO A6c: implement this method
         // Here we move one step forward the first time.
         moveForward(player);
         // Here we try to move one more step forward after that.
         moveForward(player);
     }
 
-    // TODO A6c: implement this method
+    /**
+     * Turns a player one step to the right.
+     *
+     * @param player the player to turn
+     */
     public void turnRight(@NotNull Player player) {
+        // TODO A6c: implement this method
         // Here we stop if the player is not on this board.
         if (player.board != board) {
             return;
@@ -274,8 +314,13 @@ public class GameController {
         player.setHeading(player.getHeading().next());
     }
 
-    // TODO A6c: implement this method
+    /**
+     * Turns a player one step to the left.
+     *
+     * @param player the player to turn
+     */
     public void turnLeft(@NotNull Player player) {
+        // TODO A6c: implement this method
         // Here we stop if the player is not on this board.
         if (player.board != board) {
             return;
@@ -285,8 +330,13 @@ public class GameController {
         player.setHeading(player.getHeading().prev());
     }
 
-    // TODO A6c: Add two methods for the new commands BACK and UTURN here.
+    /**
+     * Moves a player one space backwards, pushing other players if possible.
+     *
+     * @param player the player to move
+     */
     public void moveBack(@NotNull Player player) {
+        // TODO A6c: Add two methods for the new commands BACK and UTURN here.
         // Here we stop if the player is not on this board.
         if (player.board != board || player.getSpace() == null) {
             return;
@@ -294,15 +344,15 @@ public class GameController {
 
         // Here we find the direction behind the player.
         Heading backHeading = player.getHeading().next().next();
-        // Here we ask for the space behind the player.
-        Space nextSpace = board.getNeighbour(player.getSpace(), backHeading);
-
-        // Here we only move back if that space can be reached and is empty.
-        if (nextSpace != null && nextSpace.getPlayer() == null) {
-            player.setSpace(nextSpace);
-        }
+        // Here we try to move one step in the direction behind the player.
+        movePlayer(player, backHeading);
     }
 
+    /**
+     * Turns a player around.
+     *
+     * @param player the player to turn
+     */
     public void turnAround(@NotNull Player player) {
         // Here we stop if the player is not on this board.
         if (player.board != board) {
@@ -313,6 +363,11 @@ public class GameController {
         player.setHeading(player.getHeading().next().next());
     }
 
+    /**
+     * Executes all field actions on the given space.
+     *
+     * @param space the space whose actions should be executed
+     */
     private void executeFieldActions(@NotNull Space space) {
         // Here we go through all actions on the space one by one.
         for (FieldAction action : space.getActions()) {
@@ -321,11 +376,21 @@ public class GameController {
         }
     }
 
+    /**
+     * Returns the interactive command that is currently waiting for a choice.
+     *
+     * @return the pending interactive command, or null if none is waiting
+     */
     public Command getPendingInteractiveCommand() {
         // Here we give back the interactive command that is waiting for a choice.
         return pendingInteractiveCommand;
     }
 
+    /**
+     * Executes one of the available options of the pending interactive command.
+     *
+     * @param command the chosen command option
+     */
     public void executeInteractiveCommandOption(@NotNull Command command) {
         // Here we stop if the game is not waiting for an interactive choice.
         if (board.getPhase() != Phase.PLAYER_INTERACTION) {
@@ -362,6 +427,12 @@ public class GameController {
         }
     }
 
+    /**
+     * Finishes the current player's step by executing field actions and
+     * advancing to the next player or next register.
+     *
+     * @param currentPlayer the player whose step has just been completed
+     */
     private void finishCurrentPlayerStep(@NotNull Player currentPlayer) {
         // Here we run the field actions on the space where the player ends up.
         if (currentPlayer.getSpace() != null) {
@@ -393,12 +464,38 @@ public class GameController {
     }
 
     /**
-     * A method called when no corresponding controller operation is implemented yet.
-     * This should eventually be removed.
+     * Tries to move a player one space in the given direction and pushes blocking
+     * players in the same direction when possible.
+     *
+     * @param player the player to move
+     * @param heading the direction of the move
+     * @return true if the player was moved successfully
      */
-    public void notImplemented() {
-        // XXX just for now to indicate that the actual method is not yet implemented
-        assert false;
+    boolean movePlayer(@NotNull Player player, @NotNull Heading heading) {
+        // Here we stop if the player is not placed on this board.
+        if (player.board != board || player.getSpace() == null) {
+            return false;
+        }
+
+        // Here we ask the board for the next space in the chosen direction.
+        Space nextSpace = board.getNeighbour(player.getSpace(), heading);
+
+        // Here we stop if there is no reachable next space.
+        if (nextSpace == null) {
+            return false;
+        }
+
+        // Here we push the blocking player first if the next space is occupied.
+        if (nextSpace.getPlayer() != null) {
+            boolean moved = movePlayer(nextSpace.getPlayer(), heading);
+            if (!moved) {
+                return false;
+            }
+        }
+
+        // Here we move the player into the next space.
+        player.setSpace(nextSpace);
+        return true;
     }
 
 }

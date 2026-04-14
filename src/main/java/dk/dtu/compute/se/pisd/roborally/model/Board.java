@@ -30,9 +30,8 @@ import java.util.List;
 import static dk.dtu.compute.se.pisd.roborally.model.Phase.INITIALISATION;
 
 /**
- * This represents a RoboRally game board. Which gives access to
- * all the information of current state of the games. Note that
- * the terms board and game are used almost interchangeably.
+ * Represents one RoboRally game board and stores the full game state.
+ * Note that the terms board and game are used almost interchangeably.
  *
  * @author Ekkart Kindler, ekki@dtu.dk
  *
@@ -126,10 +125,20 @@ public class Board extends Subject {
         }
     }
 
+    /**
+     * Returns the player whose turn it currently is.
+     *
+     * @return the current player
+     */
     public Player getCurrentPlayer() {
         return current;
     }
 
+    /**
+     * Sets the current player.
+     *
+     * @param player the player whose turn it should be
+     */
     public void setCurrentPlayer(Player player) {
         if (player != this.current && players.contains(player)) {
             this.current = player;
@@ -137,11 +146,21 @@ public class Board extends Subject {
         }
     }
 
+    /**
+     * Returns the winner of the game.
+     *
+     * @return the winning player, or null if the game has no winner yet
+     */
     public Player getWinner() {
         // Here we give back the player who won the game.
         return winner;
     }
 
+    /**
+     * Stores the winner of the game.
+     *
+     * @param winner the player who won the game
+     */
     public void setWinner(Player winner) {
         // Here we only save the winner if it changed.
         if (winner != this.winner) {
@@ -185,11 +204,21 @@ public class Board extends Subject {
         }
     }
 
+    /**
+     * Returns how many manual moves have been made with the click-move helper.
+     *
+     * @return the move counter
+     */
     public int getMoveCounter() {
         // Here we just give back the move counter value.
         return moveCounter;
     }
 
+    /**
+     * Updates the move counter.
+     *
+     * @param moveCounter the new move counter value
+     */
     public void setMoveCounter(int moveCounter) {
         // Here we only update the value if it is different from before.
         if (moveCounter != this.moveCounter) {
@@ -261,6 +290,11 @@ public class Board extends Subject {
         return neighbour;
     }
 
+    /**
+     * Builds the status text shown below the board.
+     *
+     * @return the current status text
+     */
     public String getStatusMessage() {
         // this is actually a view aspect, but for making assignment V1 easy for
         // the students, this method gives a string representation of the current
@@ -284,7 +318,8 @@ public class Board extends Subject {
             registerText = String.valueOf(getStep() + 1);
         }
         // Here we start with the normal status text.
-        String status = "Phase = " + getPhase() + ", Player = " + playerName + ", Register = " + registerText;
+        String status = "Phase = " + getPhase() + ", Player = " + playerName + ", Register = " + registerText
+                + ", Moves = " + getMoveCounter();
         // Here we add winner information when someone has won the game.
         if (getWinner() != null) {
             status = status + ", Winner = " + getWinner().getName();
@@ -293,6 +328,12 @@ public class Board extends Subject {
         return status;
     }
 
+    /**
+     * Returns the opposite direction of the given heading.
+     *
+     * @param heading the heading to invert
+     * @return the opposite heading
+     */
     private Heading getOppositeHeading(Heading heading) {
         // Here we return the opposite direction of the heading we got.
         switch (heading) {

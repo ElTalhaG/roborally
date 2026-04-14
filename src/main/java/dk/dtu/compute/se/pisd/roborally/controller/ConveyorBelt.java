@@ -26,10 +26,9 @@ import dk.dtu.compute.se.pisd.roborally.model.Space;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * This class represents a conveyor belt on a space.
+ * Represents a conveyor belt field action that moves a player by one space.
  *
  * @author Ekkart Kindler, ekki@dtu.dk
- *
  */
 // XXX A6b this class might give you some inspiration for
 //         implementing the class CheckPoint
@@ -48,7 +47,11 @@ public class ConveyorBelt extends FieldAction {
     }
 
     /**
-     * Implementation of the action of a conveyor belt. Needs to be implemented for A3.
+     * Executes the conveyor belt action on the given space.
+     *
+     * @param gameController the controller of the current game
+     * @param space the space whose conveyor action should run
+     * @return true if a player was moved, false otherwise
      */
     @Override
     public boolean doAction(@NotNull GameController gameController, @NotNull Space space) {
@@ -63,24 +66,8 @@ public class ConveyorBelt extends FieldAction {
             return false;
         }
 
-        // Here we ask the board for the next space in the conveyor direction.
-        Space nextSpace = space.board.getNeighbour(space, heading);
-
-        // Here we stop if the next space cannot be reached.
-        if (nextSpace == null) {
-            return false;
-        }
-
-        // Here we stop if another player is already standing on the next space.
-        if (nextSpace.getPlayer() != null) {
-            return false;
-        }
-
-        // Here we move the player one step in the conveyor direction.
-        space.getPlayer().setSpace(nextSpace);
-
-        // Here we say that the action was carried out.
-        return true;
+        // Here we ask the controller to move the player in the conveyor direction.
+        return gameController.movePlayer(space.getPlayer(), heading);
     }
 
 }

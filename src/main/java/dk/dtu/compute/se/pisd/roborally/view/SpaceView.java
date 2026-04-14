@@ -37,10 +37,9 @@ import javafx.scene.shape.Polygon;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * ...
+ * Visual representation of one board space, including walls, actions, and player token.
  *
  * @author Ekkart Kindler, ekki@dtu.dk
- *
  */
 public class SpaceView extends StackPane implements ViewObserver {
 
@@ -49,7 +48,11 @@ public class SpaceView extends StackPane implements ViewObserver {
 
     public final Space space;
 
-
+    /**
+     * Creates the view for one space.
+     *
+     * @param space the model space shown by this view
+     */
     public SpaceView(@NotNull Space space) {
         this.space = space;
 
@@ -75,6 +78,9 @@ public class SpaceView extends StackPane implements ViewObserver {
         update(space);
     }
 
+    /**
+     * Draws the player token on the space, if a player is present.
+     */
     private void updatePlayer() {
         Player player = space.getPlayer();
         if (player != null) {
@@ -108,6 +114,9 @@ public class SpaceView extends StackPane implements ViewObserver {
         }
     }
 
+    /**
+     * Draws all walls on this space.
+     */
     private void drawWalls() {
         // Here we go through all walls on this space one by one.
         for (Heading wall : space.getWalls()) {
@@ -144,6 +153,9 @@ public class SpaceView extends StackPane implements ViewObserver {
         }
     }
 
+    /**
+     * Draws all field actions on this space.
+     */
     private void drawActions() {
         // Here we go through all field actions on this space one by one.
         for (FieldAction action : space.getActions()) {
@@ -157,6 +169,11 @@ public class SpaceView extends StackPane implements ViewObserver {
         }
     }
 
+    /**
+     * Draws a conveyor belt marker.
+     *
+     * @param conveyorBelt the conveyor belt to visualise
+     */
     private void drawConveyorBelt(ConveyorBelt conveyorBelt) {
         // Here we make a small triangle that shows the belt direction.
         Polygon arrow = new Polygon(0.0, -10.0,
@@ -173,6 +190,11 @@ public class SpaceView extends StackPane implements ViewObserver {
         this.getChildren().add(arrow);
     }
 
+    /**
+     * Draws a checkpoint marker.
+     *
+     * @param checkPoint the checkpoint to visualise
+     */
     private void drawCheckPoint(CheckPoint checkPoint) {
         // Here we make a small circle to show the checkpoint position.
         Circle circle = new Circle(10.0);

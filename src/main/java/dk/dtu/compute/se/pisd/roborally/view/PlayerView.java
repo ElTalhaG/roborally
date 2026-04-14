@@ -36,10 +36,9 @@ import javafx.scene.layout.VBox;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * ...
+ * Shows one player's cards, buttons, and status information in a tab.
  *
  * @author Ekkart Kindler, ekki@dtu.dk
- *
  */
 public class PlayerView extends Tab implements ViewObserver {
 
@@ -66,6 +65,12 @@ public class PlayerView extends Tab implements ViewObserver {
 
     private GameController gameController;
 
+    /**
+     * Creates the tab for one player.
+     *
+     * @param gameController the controller used by the UI actions
+     * @param player the player shown in this tab
+     */
     public PlayerView(@NotNull GameController gameController, @NotNull Player player) {
         super(player.getName());
         this.setStyle("-fx-text-base-color: " + player.getColor() + ";");
@@ -90,12 +95,9 @@ public class PlayerView extends Tab implements ViewObserver {
             }
         }
 
-        // FIXME the following buttons should actually not be on the tabs of the individual
-        //       players, but on the PlayersView (view for all players). This should be
-        //       refactored.
-
+        // These buttons are kept on the player tab in this version of the course project.
         // TODO A6c: the following buttons should be associated with the proper methods
-        //          in the game controller
+        //          in the game controller.
 
         finishButton = new Button("Finish Programming");
         finishButton.setOnAction( e -> gameController.finishProgrammingPhase());
@@ -221,8 +223,7 @@ public class PlayerView extends Tab implements ViewObserver {
                 if (player.board.getCurrentPlayer() == player) {
                     // TODO A6e: these buttons should be shown only when there is
                     //      an interactive command card, and the buttons should represent
-                    //      the player's choices of the interactive command card. The
-                    //      following is just a mockup showing two options
+                    //      the player's choices of the interactive command card.
                     // Here we get the interactive command that is waiting for a choice.
                     Command interactiveCommand = gameController.getPendingInteractiveCommand();
                     // Here we only show option buttons if there really is an interactive command.

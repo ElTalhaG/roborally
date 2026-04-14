@@ -7,14 +7,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A factory for creating boards. The factory itself is implemented as a singleton.
+ * Creates game boards by name. The factory itself is implemented as a singleton.
  *
- * @author Ekkart Kindler, ekki@dtu.dk
+ * @author Ekkart Kindler, ikke@dtu.dk
  */
 // XXX A3: might be used for creating a first slightly more interesting board.
 public class BoardFactory {
 
     private static final String DEFAULT_BOARD_NAME = "defaultboard";
+    private static final String ADVANCED_BOARD_NAME = "advancedboard";
 
     /**
      * The single instance of this class, which is lazily instantiated on demand.
@@ -78,7 +79,6 @@ public class BoardFactory {
     //     names in this list. Make sure that the new method that you create
     //     here has a proper JavaDoc documentation.
     //
-
     /**
      * Returns the names of the boards that can be selected in the application.
      *
@@ -86,7 +86,7 @@ public class BoardFactory {
      */
     public List<String> getAvailableBoardNames() {
         // Here we return the board names that exist in the project right now.
-        return Arrays.asList(DEFAULT_BOARD_NAME);
+        return Arrays.asList(DEFAULT_BOARD_NAME, ADVANCED_BOARD_NAME);
     }
 
 }
